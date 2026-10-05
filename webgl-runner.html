@@ -1,0 +1,23 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>Pocket WebGL Runner</title></head>
+<body style="margin:0;background:#111;color:#ddd;font-family:system-ui;padding:16px">Starting WebGL page…
+<script>
+(function(){
+  let started=false;
+  window.addEventListener('message', function(e){
+    if(started || e.source!==parent || !e.data || e.data.__pwRunnerBoot!==true) return;
+    if(e.origin!==location.origin) return;
+    started=true;
+    const html=String(e.data.html||'');
+    try {
+      document.open('text/html','replace');
+      document.write(html);
+      document.close();
+    } catch(err) {
+      try{ parent.postMessage({__pwdebug:true,kind:'error',msg:'WEBGL RUNNER WRITE FAILED — '+(err&&err.stack||err)},'*'); }catch(_){}
+    }
+  });
+  try{ parent.postMessage({__pwdebug:true,kind:'info',msg:'WEBGL RUNNER READY — '+location.href},'*'); }catch(_){}
+})();
+<\/script>
+</body></html>
