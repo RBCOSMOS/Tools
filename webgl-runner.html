@@ -1,23 +1,44 @@
 <!doctype html>
-<html><head><meta charset="utf-8"><title>Pocket WebGL Runner</title></head>
-<body style="margin:0;background:#111;color:#ddd;font-family:system-ui;padding:16px">Starting WebGL page…
+<html>
+<head>
+<meta charset="utf-8">
+<title>Pocket WebGL Runner</title>
+<style>html,body{margin:0;width:100%;height:100%;background:#111;color:#ddd;font-family:system-ui}#boot{padding:16px}</style>
+</head>
+<body><div id="boot">Starting WebGL page…</div>
 <script>
 (function(){
   let started=false;
-  window.addEventListener('message', function(e){
-    if(started || e.source!==parent || !e.data || e.data.__pwRunnerBoot!==true) return;
-    if(e.origin!==location.origin) return;
+  const debug=(kind,msg)=>{try{parent.postMessage({__pwdebug:true,kind,msg:String(msg)},'*')}catch(_){}};
+  window.addEventListener('error',e=>{
+    if(e.target&&e.target!==window){debug('error','RUNNER RESOURCE FAILED — '+(e.target.src||e.target.href||e.target.tagName||'unknown'));return;}
+    debug('error','RUNNER JS ERROR — '+(e.message||'Script error')+(e.filename?' @ '+e.filename+':'+e.lineno+':'+e.colno:''));
+  },true);
+  window.addEventListener('unhandledrejection',e=>debug('error','RUNNER UNHANDLED PROMISE — '+(e.reason&&e.reason.stack||e.reason||'unknown')));
+  window.addEventListener('message',function(e){
+    if(started||e.source!==parent||!e.data||e.data.__pwRunnerBoot!==true)return;
+    if(e.origin!==location.origin){debug('error','RUNNER BOOT ORIGIN MISMATCH — '+e.origin);return;}
     started=true;
-    const html=String(e.data.html||'');
-    try {
+    let html=String(e.data.html||'');
+    // This specific old Hollow Knight launcher references a stylesheet that no longer exists on its CDN.
+    // Its required fullscreen layout is already inline, so omit only that known-dead link to avoid a 404.
+    if(/aukak\/hollow-knight@2fc2e7149f0d5b2609b135ab48f00fd973930635/i.test(html)){
+      html=html.replace(/<link\b[^>]*href=["']TemplateData\/style\.css["'][^>]*>/ig,'');
+    }
+    debug('info','WEBGL RUNNER BOOT — '+location.href);
+    try{
       document.open('text/html','replace');
       document.write(html);
       document.close();
-    } catch(err) {
-      try{ parent.postMessage({__pwdebug:true,kind:'error',msg:'WEBGL RUNNER WRITE FAILED — '+(err&&err.stack||err)},'*'); }catch(_){}
+    }catch(err){
+      debug('error','WEBGL RUNNER WRITE FAILED — '+(err&&err.stack||err));
     }
   });
-  try{ parent.postMessage({__pwdebug:true,kind:'info',msg:'WEBGL RUNNER READY — '+location.href},'*'); }catch(_){}
+  try{
+    parent.postMessage({__pwRunnerReady:true},location.origin);
+    debug('info','WEBGL RUNNER READY — '+location.href);
+  }catch(err){debug('error','WEBGL RUNNER READY FAILED — '+(err&&err.stack||err));}
 })();
-<\/script>
-</body></html>
+</script>
+</body>
+</html>

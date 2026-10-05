@@ -1,8 +1,8 @@
 /* App shell only. Frozen HTML copies live in IndexedDB and are NEVER refreshed here. */
-const VERSION = 'pocket-shell-v2.0.0';
+const VERSION = 'pocket-shell-v2.1.0';
 const ROOT = new URL('./', self.location.href).href;
 const CACHE = VERSION + ':' + ROOT;
-const SHELL = ['index.html','config.js','features.js','snapshot.js','features.css','manifest.webmanifest','icon.svg'];
+const SHELL = ['index.html','config.js','features.js','snapshot.js','features.css','manifest.webmanifest','icon.svg','webgl-runner.html'];
 const URLS = SHELL.map(p => new URL(p, ROOT).href);
 self.addEventListener('install', event => {
   event.waitUntil((async () => {

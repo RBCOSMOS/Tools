@@ -110,3 +110,10 @@ Copies never refresh on startup, reconnect, public refresh, or app update. **Rep
 Pocket Workspace now detects HTML files that contain an absolute HTTP(S) `<base href>` and runs them from a temporary HTML Blob URL instead of `iframe.srcdoc`. This preserves relative CDN paths used by split Unity/WebGL launchers (for example `Build/game.data.part1`, loader/framework scripts, WASM parts, and StreamingAssets). The preview iframe still receives the same sandbox, fullscreen, pointer-lock, autoplay, gamepad, download, and popup permissions.
 
 Large game assets remain owned/cached by the launched app itself (typically IndexedDB). Pocket does not copy hundreds of megabytes of remote build parts into the workspace database.
+
+
+## v15 WebGL runner fix
+- Fixed malformed `webgl-runner.html` script closing tag that prevented the runner from starting.
+- Added READY/BOOT postMessage handshake and timeout diagnostics.
+- Added cache-busted runner URL and included `webgl-runner.html` in the service-worker shell cache.
+- Omits the known-dead Hollow Knight `TemplateData/style.css` link for the pinned launcher while preserving the rest of the source.
